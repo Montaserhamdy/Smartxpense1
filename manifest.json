@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "SmartXpense",
+  "version": "1.0.0",
+  "description": "Smart Expense Manager for quick tracking.",
+  "action": {
+    "default_title": "SmartXpense"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage"],
+  "icons": {
+    "16": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
+  }
+}

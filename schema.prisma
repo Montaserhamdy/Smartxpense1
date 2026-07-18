@@ -1,0 +1,297 @@
+// SmartXpense — Prisma schema
+// Architecture note: "Expenses", "Income", and "Transactions" from the product
+// spec are modeled as ONE table (`Transaction`) with a `type` discriminator.
+// This avoids triplicated CRUD/report logic for what is structurally the same
+// entity (an amount, a category, a date, a note) and matches how production
+// fintech schemas (Mint, YNAB) are actually built.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Enums ----------
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+}
+
+enum Currency {
+  USD
+  EUR
+  EGP
+  SAR
+  AED
+  KWD
+}
+
+enum Language {
+  EN
+  AR
+  FR
+}
+
+enum ThemePreference {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum RecurrenceFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum BudgetPeriod {
+  MONTHLY
+  YEARLY
+}
+
+enum GoalStatus {
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+}
+
+enum NotificationType {
+  BUDGET_ALERT
+  GOAL_ALERT
+  WEEKLY_SUMMARY
+  MONTHLY_SUMMARY
+  SYSTEM
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  LOGIN_FAILED
+  PASSWORD_RESET
+  EMAIL_VERIFIED
+}
+
+// ---------- Models ----------
+
+model User {
+  id                String   @id @default(cuid())
+  name              String
+  username          String   @unique
+  email             String   @unique
+  passwordHash      String
+  profilePictureUrl String?
+  country           String?
+  currency          Currency        @default(USD)
+  language          Language        @default(EN)
+  timezone          String          @default("UTC")
+  theme             ThemePreference @default(SYSTEM)
+  subscriptionPlan  SubscriptionPlan @default(FREE)
+
+  isEmailVerified   Boolean  @default(false)
+  emailVerifiedAt   DateTime?
+
+  twoFactorEnabled  Boolean  @default(false)
+  twoFactorSecret   String?
+
+  lastLoginAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  sessions      Session[]
+  transactions  Transaction[]
+  categories    Category[]
+  budgets       Budget[]
+  goals         Goal[]
+  notifications Notification[]
+  subscription  Subscription?
+  activityLogs  ActivityLog[]
+  auditLogs     AuditLog[]
+  reports       Report[]
+
+  @@index([email])
+  @@map("users")
+}
+
+/// Refresh-token sessions (one row per logged-in device)
+model Session {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash String
+  userAgent        String?
+  ipAddress        String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+/// User-defined + system default categories (system defaults have userId = null)
+model Category {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  icon      String?
+  color     String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  transactions Transaction[]
+  budgets      Budget[]
+
+  @@unique([userId, name])
+  @@map("categories")
+}
+
+model Transaction {
+  id        String          @id @default(cuid())
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      TransactionType
+  amount    Decimal         @db.Decimal(12, 2)
+  currency  Currency
+  categoryId String?
+  category  Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  occurredAt DateTime
+  notes      String?
+  imageUrl   String?
+
+  isRecurring          Boolean               @default(false)
+  recurrenceFrequency  RecurrenceFrequency?
+  recurrenceEndDate    DateTime?
+  parentTransactionId  String?
+  parentTransaction    Transaction?          @relation("RecurringInstances", fields: [parentTransactionId], references: [id], onDelete: SetNull)
+  recurringInstances   Transaction[]         @relation("RecurringInstances")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, occurredAt])
+  @@index([userId, type])
+  @@index([userId, categoryId])
+  @@map("transactions")
+}
+
+model Budget {
+  id               String       @id @default(cuid())
+  userId           String
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId       String?
+  category         Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  period           BudgetPeriod
+  amount           Decimal      @db.Decimal(12, 2)
+  startDate        DateTime
+  endDate          DateTime
+  alertThresholds  Int[]        @default([50, 75, 90, 100])
+  lastAlertSent    Int?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@unique([userId, categoryId, period, startDate])
+  @@index([userId])
+  @@map("budgets")
+}
+
+model Goal {
+  id            String     @id @default(cuid())
+  userId        String
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  targetAmount  Decimal    @db.Decimal(12, 2)
+  currentAmount Decimal    @default(0) @db.Decimal(12, 2)
+  targetDate    DateTime?
+  status        GoalStatus @default(IN_PROGRESS)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([userId])
+  @@map("goals")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  isRead    Boolean          @default(false)
+  metadata  Json?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+model Subscription {
+  id                   String           @id @default(cuid())
+  userId               String           @unique
+  user                 User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan                 SubscriptionPlan @default(FREE)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean          @default(false)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  @@map("subscriptions")
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("activity_logs")
+}
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  userId    String?
+  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    AuditAction
+  entity    String
+  entityId  String?
+  ipAddress String?
+  userAgent String?
+  metadata  Json?
+  createdAt DateTime    @default(now())
+
+  @@index([userId, createdAt])
+  @@map("audit_logs")
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String   // PDF | CSV | EXCEL | PNG
+  period      String   // e.g. "2026-07", "2026", "weekly:2026-07-14"
+  fileUrl     String?
+  generatedAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("reports")
+}
