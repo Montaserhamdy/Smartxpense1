@@ -3,6 +3,8 @@ import cors from "cors";
 import apiRouter from "./routes/index.js";
 import { errorHandler, notFoundHandler, requestLogger } from "./middleware/index.js";
 import type { HealthStatus } from "./types/index.js";
+import { checkDatabaseConnection } from "./db/connection.js";
+import { runMigrations } from "./db/migrations.js";
 
 const app: Application = express();
 
@@ -25,8 +27,29 @@ app.use(errorHandler);
 
 const PORT = Number(process.env.PORT) || 3000;
 
-app.listen(PORT, () => {
-  console.log(`smartxpense-backend listening on port ${PORT}`);
+async function start(): Promise<void> {
+  const isConnected = await checkDatabaseConnection();
+
+  if (isConnected) {
+    try {
+      await runMigrations();
+    } catch (err) {
+      console.error("Startup migrations failed:", err);
+    }
+  } else {
+    console.error(
+      "Starting server without a verified database connection. Database-backed routes will fail until connectivity is restored."
+    );
+  }
+
+  app.listen(PORT, () => {
+    console.log(`smartxpense-backend listening on port ${PORT}`);
+  });
+}
+
+start().catch((err) => {
+  console.error("Failed to start smartxpense-backend:", err);
+  process.exit(1);
 });
 
 export default app;
