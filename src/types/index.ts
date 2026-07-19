@@ -8,6 +8,10 @@ export interface HealthStatus {
   status: "ok" | "error";
   uptime: number;
   timestamp: string;
+  database?: {
+    status: "connected" | "disconnected" | "not_configured";
+    error?: string;
+  };
 }
 
 export interface StatusInfo {

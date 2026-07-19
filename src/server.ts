@@ -2,6 +2,7 @@ import express, { type Application, type Request, type Response } from "express"
 import cors from "cors";
 import apiRouter from "./routes/index.js";
 import { errorHandler, notFoundHandler, requestLogger } from "./middleware/index.js";
+import { pingDatabase } from "./db/index.js";
 import type { HealthStatus } from "./types/index.js";
 
 const app: Application = express();
@@ -10,11 +11,14 @@ app.use(cors());
 app.use(express.json());
 app.use(requestLogger);
 
-app.get("/health", (_req: Request, res: Response<HealthStatus>) => {
+app.get("/health", async (_req: Request, res: Response<HealthStatus>) => {
+  const database = await pingDatabase();
+
   res.status(200).json({
     status: "ok",
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
+    database,
   });
 });
 
