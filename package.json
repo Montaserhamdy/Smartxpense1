@@ -12,8 +12,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "prisma generate && tsc -p tsconfig.json",
-    "start": "prisma migrate deploy && node dist/server.js",
-    "lint": "eslint src --ext .ts",
+"start": "prisma db push --skip-generate --accept-data-loss && node dist/server.js",    "lint": "eslint src --ext .ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
