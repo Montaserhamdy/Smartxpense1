@@ -92,6 +92,8 @@ model User {
   username          String   @unique
   email             String   @unique
   passwordHash      String
+  resetTokenHash    String?
+  resetTokenExpiry  DateTime?
   profilePictureUrl String?
   country           String?
   currency          Currency        @default(USD)

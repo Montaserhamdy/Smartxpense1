@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { verifyToken } from "../lib/jwt.js";
+import { verifyAccessToken } from "../lib/jwt.js";
 
 export function authenticate(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization;
@@ -8,7 +8,7 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
   }
   const token = header.slice(7);
   try {
-    const payload = verifyToken(token);
+    const payload = verifyAccessToken(token);
     (req as any).userId = payload.userId;
     next();
   } catch {
