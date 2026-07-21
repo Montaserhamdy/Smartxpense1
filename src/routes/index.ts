@@ -2,11 +2,13 @@ import { Router } from "express";
 import type { Request, Response } from "express";
 import { getHealth } from "../controllers/healthController.js";
 import type { ApiResponse, StatusInfo } from "../types/index.js";
+import authRouter from "./auth.js";
 
 const router = Router();
 
-router.get("/health", getHealth);
+router.use("/auth", authRouter);
 
+router.get("/health", getHealth);
 router.get("/status", (_req: Request, res: Response<ApiResponse<StatusInfo>>) => {
   res.status(200).json({
     success: true,
@@ -17,12 +19,10 @@ router.get("/status", (_req: Request, res: Response<ApiResponse<StatusInfo>>) =>
     },
   });
 });
-
 router.post("/echo", (req: Request, res: Response<ApiResponse>) => {
   res.status(200).json({
     success: true,
     data: req.body,
   });
 });
-
 export default router;
