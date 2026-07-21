@@ -1,13 +1,16 @@
 import express, { type Application, type Request, type Response } from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import apiRouter from "./routes/index.js";
 import { errorHandler, notFoundHandler, requestLogger } from "./middleware/index.js";
 import type { HealthStatus } from "./types/index.js";
 
 const app: Application = express();
 
-app.use(cors());
+const corsOrigin = process.env.CORS_ORIGIN ?? "http://localhost:5173";
+app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(express.json());
+app.use(cookieParser());
 app.use(requestLogger);
 
 app.get("/health", (_req: Request, res: Response<HealthStatus>) => {

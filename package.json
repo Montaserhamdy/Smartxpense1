@@ -12,7 +12,8 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "prisma generate && tsc -p tsconfig.json",
-"start": "prisma db push --skip-generate --accept-data-loss && node dist/server.js",    "lint": "eslint src --ext .ts",
+    "start": "prisma db push --skip-generate --accept-data-loss && node dist/server.js",
+    "lint": "eslint src --ext .ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
@@ -27,7 +28,9 @@
     "jsonwebtoken": "^9.0.2",
     "pino": "^9.4.0",
     "pino-http": "^10.3.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "nodemailer": "^6.9.4",
+    "cookie-parser": "^1.4.6"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -38,6 +41,7 @@
     "pino-pretty": "^11.2.2",
     "prisma": "^5.19.1",
     "tsx": "^4.19.0",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "@types/cookie-parser": "^1.4.3"
   }
 }
