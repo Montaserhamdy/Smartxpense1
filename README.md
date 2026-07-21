@@ -1,6 +1,6 @@
 # SmartXpense Backend — Phase 1: Foundation
 
-This is a real, runnable backend foundation — not a mock. It has not been
+This is a real, runnable backend foundation — not  a mock. It has not been
 `npm install`-ed or executed in this environment (no network/DB access here),
 so **you must run it locally to verify it** before building on top of it.
 Everything below tells you how.
