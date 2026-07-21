@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SmartXpense</title>
+    <script>
+      if (!localStorage.getItem("smartxpense_token")) {
+        window.location.href = "./login.html";
+      }
+    </script>
 <script type="module" crossorigin src="./assets/index-CZWrS1rw.js"></script>
 <link rel="stylesheet" crossorigin href="./assets/index-CbTxaU5Q.css">  </head>
   <body>
