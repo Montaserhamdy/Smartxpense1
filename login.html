@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تسجيل الدخول - SmartXpense</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      background: #f6f5f2;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    }
+    h1 {
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 6px;
+      color: #1a1a1a;
+    }
+    .subtitle {
+      text-align: center;
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+    .tabs {
+      display: flex;
+      background: #f1f0ec;
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #888;
+      transition: 0.2s;
+      user-select: none;
+    }
+    .tab.active {
+      background: #1a1a1a;
+      color: #fff;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 6px;
+      margin-top: 16px;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #e5e3dd;
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+      transition: 0.2s;
+      font-family: inherit;
+    }
+    input:focus {
+      border-color: #1a1a1a;
+    }
+    button.submit {
+      width: 100%;
+      margin-top: 24px;
+      padding: 13px;
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+      font-family: inherit;
+    }
+    button.submit:hover { background: #333; }
+    button.submit:disabled { background: #bbb; cursor: not-allowed; }
+    .msg {
+      margin-top: 16px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      text-align: center;
+      display: none;
+    }
+    .msg.error { background: #fdecec; color: #c0392b; display: block; }
+    .msg.success { background: #eafaf1; color: #1e8449; display: block; }
+    .form { display: none; }
+    .form.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>SmartXpense</h1>
+    <div class="subtitle">صحتك المالية تبدأ من هنا</div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="login">تسجيل الدخول</div>
+      <div class="tab" data-tab="register">إنشاء حساب</div>
+    </div>
+
+    <div class="msg" id="msg"></div>
+
+    <!-- Login form -->
+    <form class="form active" id="loginForm">
+      <label>البريد الإلكتروني</label>
+      <input type="email" id="loginEmail" required placeholder="example@email.com" />
+      <label>كلمة المرور</label>
+      <input type="password" id="loginPassword" required placeholder="••••••••" />
+      <button type="submit" class="submit" id="loginBtn">دخول</button>
+    </form>
+
+    <!-- Register form -->
+    <form class="form" id="registerForm">
+      <label>الاسم الكامل</label>
+      <input type="text" id="regName" required placeholder="اسمك" />
+      <label>اسم المستخدم</label>
+      <input type="text" id="regUsername" required placeholder="username" />
+      <label>البريد الإلكتروني</label>
+      <input type="email" id="regEmail" required placeholder="example@email.com" />
+      <label>كلمة المرور</label>
+      <input type="password" id="regPassword" required minlength="6" placeholder="6 أحرف على الأقل" />
+      <button type="submit" class="submit" id="registerBtn">إنشاء الحساب</button>
+    </form>
+  </div>
+
+  <script>
+    const API_BASE = "https://smartxpense1-production-f4a5.up.railway.app/api";
+
+    // If already logged in, skip straight to the dashboard
+    if (localStorage.getItem("smartxpense_token")) {
+      window.location.href = "./index.html";
+    }
+
+    const tabs = document.querySelectorAll(".tab");
+    const forms = document.querySelectorAll(".form");
+    const msg = document.getElementById("msg");
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        tabs.forEach((t) => t.classList.remove("active"));
+        forms.forEach((f) => f.classList.remove("active"));
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.tab + "Form").classList.add("active");
+        msg.style.display = "none";
+      });
+    });
+
+    function showMsg(text, type) {
+      msg.textContent = text;
+      msg.className = "msg " + type;
+    }
+
+    function saveSessionAndRedirect(data) {
+      localStorage.setItem("smartxpense_token", data.token);
+      localStorage.setItem("smartxpense_user", JSON.stringify(data.user));
+      window.location.href = "./index.html";
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("loginBtn");
+      btn.disabled = true;
+      btn.textContent = "جاري الدخول...";
+      try {
+        const res = await fetch(API_BASE + "/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: document.getElementById("loginEmail").value,
+            password: document.getElementById("loginPassword").value,
+          }),
+        });
+        const json = await res.json();
+        if (!json.success) {
+          showMsg(json.error || "حدث خطأ، حاول مرة أخرى", "error");
+        } else {
+          showMsg("تم تسجيل الدخول بنجاح", "success");
+          saveSessionAndRedirect(json.data);
+        }
+      } catch (err) {
+        showMsg("تعذر الاتصال بالخادم", "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "دخول";
+      }
+    });
+
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("registerBtn");
+      btn.disabled = true;
+      btn.textContent = "جاري الإنشاء...";
+      try {
+        const res = await fetch(API_BASE + "/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: document.getElementById("regName").value,
+            username: document.getElementById("regUsername").value,
+            email: document.getElementById("regEmail").value,
+            password: document.getElementById("regPassword").value,
+          }),
+        });
+        const json = await res.json();
+        if (!json.success) {
+          showMsg(json.error || "حدث خطأ، حاول مرة أخرى", "error");
+        } else {
+          showMsg("تم إنشاء الحساب بنجاح", "success");
+          saveSessionAndRedirect(json.data);
+        }
+      } catch (err) {
+        showMsg("تعذر الاتصال بالخادم", "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "إنشاء الحساب";
+      }
+    });
+  </script>
+</body>
+</html>
