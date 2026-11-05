@@ -3,41 +3,61 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="./logo.png" />
+    <link rel="icon" type="image/png" href="./logo.png?v=2" />
     <title>SmartXpense</title>
     <script>
       if (!localStorage.getItem("smartxpense_token")) {
         window.location.href = "./login.html";
       }
     </script>
+    <style>
+      .site-brand-logo {
+        display: block;
+        width: min(72px, 76%);
+        height: min(72px, 76%);
+        object-fit: contain;
+        flex: 0 0 auto;
+      }
+    </style>
     <script>
       (() => {
         const replaceBrandWallet = () => {
-          document.querySelectorAll("svg.lucide-wallet").forEach((wallet) => {
+          document.querySelectorAll('svg[class*="wallet" i]').forEach((wallet) => {
             let brand = wallet.parentElement;
+            let belongsToBrand = false;
+
             while (brand && brand !== document.body) {
-              if (brand.textContent.includes("SmartXpense")) {
-                const logo = document.createElement("img");
-                const { width, height } = wallet.getBoundingClientRect();
-                logo.src = "./logo.png";
-                logo.alt = "SmartXpense logo";
-                logo.className = "site-brand-logo";
-                logo.width = Math.round(width) || 56;
-                logo.height = Math.round(height) || 56;
-                logo.style.cssText = "display:block;object-fit:contain;";
-                wallet.replaceWith(logo);
+              const text = (brand.textContent || "").toLowerCase();
+              if (text.includes("smartxpense") || text.includes("مدير مصاريفك")) {
+                belongsToBrand = true;
                 break;
               }
               brand = brand.parentElement;
             }
+
+            if (!belongsToBrand) return;
+
+            const logo = document.createElement("img");
+            logo.src = "./logo.png?v=2";
+            logo.alt = "SmartXpense";
+            logo.className = "site-brand-logo";
+            wallet.replaceWith(logo);
           });
         };
 
-        new MutationObserver(replaceBrandWallet).observe(document.documentElement, {
-          childList: true,
-          subtree: true,
-        });
-        replaceBrandWallet();
+        const observeBrand = () => {
+          replaceBrandWallet();
+          new MutationObserver(replaceBrandWallet).observe(document.documentElement, {
+            childList: true,
+            subtree: true,
+          });
+        };
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", observeBrand, { once: true });
+        } else {
+          observeBrand();
+        }
       })();
     </script>
     <script type="module" crossorigin src="./assets/index-CZWrS1rw.js"></script>
