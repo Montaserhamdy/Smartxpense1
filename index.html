@@ -1,72 +1,53 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="./brand-logo.svg" />
-    <title>SmartXpense</title>
-    <script>
-      if (!localStorage.getItem("smartxpense_token")) {
-        window.location.href = "./login.html";
-      }
-    </script>
-    <style>
-      .site-brand-logo {
-        display: block;
-        width: 100%;
-        height: 100%;
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-        flex: 0 0 auto;
-      }
-    </style>
-    <script>
-      (() => {
-        const replaceBrandWallet = () => {
-          document.querySelectorAll("svg").forEach((wallet) => {
-            const iconName = `${wallet.getAttribute("class") || ""} ${wallet.getAttribute("data-lucide") || ""}`;
-            if (!/wallet/i.test(iconName)) return;
+<script>
+  (() => {
+    const replaceBrandWallet = () => {
+      const logoText = [...document.querySelectorAll("*")].find((el) => {
+        return (
+          el.children.length === 0 &&
+          /smartxpense/i.test(el.textContent || "")
+        );
+      });
 
-            let brand = wallet.parentElement;
-            let belongsToBrand = false;
-            while (brand && brand !== document.body) {
-              const text = (brand.textContent || "").toLowerCase();
-              if (text.includes("smartxpense") || text.includes("مدير مصاريفك")) {
-                belongsToBrand = true;
-                break;
-              }
-              brand = brand.parentElement;
-            }
-            if (!belongsToBrand) return;
+      if (!logoText) return;
 
-            const logo = document.createElement("img");
-            logo.src = "./brand-logo.svg";
-            logo.alt = "SmartXpense";
-            logo.className = "site-brand-logo";
-            wallet.replaceWith(logo);
-          });
-        };
+      let brandContainer = logoText.parentElement;
 
-        const observeBrand = () => {
-          replaceBrandWallet();
-          new MutationObserver(replaceBrandWallet).observe(document.documentElement, {
-            childList: true,
-            subtree: true,
-          });
-        };
+      while (brandContainer && brandContainer !== document.body) {
+        const wallet = brandContainer.querySelector(
+          'svg.lucide-wallet, svg[data-lucide="wallet"]'
+        );
 
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", observeBrand, { once: true });
-        } else {
-          observeBrand();
+        if (wallet) {
+          const logo = document.createElement("img");
+          logo.src = "./brand-logo.svg";
+          logo.alt = "SmartXpense";
+          logo.className = "site-brand-logo";
+
+          wallet.replaceWith(logo);
+          break;
         }
-      })();
-    </script>
-    <script type="module" crossorigin src="./assets/index-CZWrS1rw.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-CbTxaU5Q.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
-</html>
+
+        brandContainer = brandContainer.parentElement;
+      }
+    };
+
+    const start = () => {
+      replaceBrandWallet();
+
+      const observer = new MutationObserver(() => {
+        replaceBrandWallet();
+      });
+
+      observer.observe(document.getElementById("root"), {
+        childList: true,
+        subtree: true,
+      });
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", start, { once: true });
+    } else {
+      start();
+    }
+  })();
+</script>
