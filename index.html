@@ -10,8 +10,39 @@
         window.location.href = "./login.html";
       }
     </script>
-<script type="module" crossorigin src="./assets/index-CZWrS1rw.js"></script>
-<link rel="stylesheet" crossorigin href="./assets/index-CbTxaU5Q.css">  </head>
+    <script>
+      (() => {
+        const replaceBrandWallet = () => {
+          document.querySelectorAll("svg.lucide-wallet").forEach((wallet) => {
+            let brand = wallet.parentElement;
+            while (brand && brand !== document.body) {
+              if (brand.textContent.includes("SmartXpense")) {
+                const logo = document.createElement("img");
+                const { width, height } = wallet.getBoundingClientRect();
+                logo.src = "./logo.png";
+                logo.alt = "SmartXpense logo";
+                logo.className = "site-brand-logo";
+                logo.width = Math.round(width) || 56;
+                logo.height = Math.round(height) || 56;
+                logo.style.cssText = "display:block;object-fit:contain;";
+                wallet.replaceWith(logo);
+                break;
+              }
+              brand = brand.parentElement;
+            }
+          });
+        };
+
+        new MutationObserver(replaceBrandWallet).observe(document.documentElement, {
+          childList: true,
+          subtree: true,
+        });
+        replaceBrandWallet();
+      })();
+    </script>
+    <script type="module" crossorigin src="./assets/index-CZWrS1rw.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CbTxaU5Q.css">
+  </head>
   <body>
     <div id="root"></div>
   </body>
