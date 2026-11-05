@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 480" role="img" aria-labelledby="title">
+  <title id="title">SmartXpense logo</title>
+  <defs>
+    <linearGradient id="ring" x1=".08" y1=".08" x2=".92" y2=".92"><stop stop-color="#0876d1"/><stop offset=".52" stop-color="#00b8b2"/><stop offset="1" stop-color="#0876d1"/></linearGradient>
+    <linearGradient id="green" x1=".2" y1="1" x2=".85" y2="0"><stop stop-color="#006d40"/><stop offset="1" stop-color="#43df18"/></linearGradient>
+    <linearGradient id="coin" x1=".18" y1=".15" x2=".82" y2=".88"><stop stop-color="#ffe72a"/><stop offset=".6" stop-color="#ffb900"/><stop offset="1" stop-color="#ff8d00"/></linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#00c9ed"/><stop offset="1" stop-color="#0879df"/></linearGradient>
+    <linearGradient id="orange" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffd21c"/><stop offset="1" stop-color="#ff8c00"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#03264b" flood-opacity=".35"/></filter>
+    <clipPath id="inside"><circle cx="240" cy="240" r="190"/></clipPath>
+  </defs>
+  <circle cx="240" cy="240" r="222" fill="none" stroke="#06264b" stroke-width="18"/>
+  <path d="M52 144A211 211 0 0 1 381 61" fill="none" stroke="url(#ring)" stroke-width="22" stroke-linecap="round"/>
+  <path d="m365 42 73 13-54 52-5-31-31-14z" fill="#00a95c"/>
+  <path d="M431 145a211 211 0 0 1-41 228" fill="none" stroke="url(#green)" stroke-width="21" stroke-linecap="round"/>
+  <g clip-path="url(#inside)" filter="url(#shadow)">
+    <path d="M85 325V200q0-24 24-24h191q24 0 24 24v111z" fill="url(#green)" stroke="#004d3a" stroke-width="10"/>
+    <path d="M90 207h224v20H90z" fill="#00d879" opacity=".8"/>
+    <circle cx="236" cy="129" r="99" fill="url(#coin)" stroke="#f28b00" stroke-width="9"/>
+    <circle cx="236" cy="129" r="79" fill="none" stroke="#f47700" stroke-width="6"/>
+    <path d="M252 82c-7-8-18-11-31-9-28 4-36 37-11 50l31 15c21 10 14 39-9 43-16 3-32-3-42-13" fill="none" stroke="#fff8e6" stroke-width="19" stroke-linecap="round"/>
+    <path d="M236 61v21m0 103v22" stroke="#fff8e6" stroke-width="16" stroke-linecap="round"/>
+    <path d="M91 313 139 300v80H91z" fill="url(#orange)" stroke="#06315a" stroke-width="7"/>
+    <path d="m145 298 51-13v103h-51z" fill="#ffc400" stroke="#06315a" stroke-width="7"/>
+    <path d="m202 282 51-17v123h-51z" fill="url(#blue)" stroke="#06315a" stroke-width="7"/>
+    <path d="m259 260 51-19v147h-51z" fill="url(#blue)" stroke="#06315a" stroke-width="7"/>
+    <path d="m316 235 49-20v173h-49z" fill="#087de0" stroke="#06315a" stroke-width="7"/>
+    <path d="m73 289 116-31 81-38 78-64 49-52" fill="none" stroke="#06315a" stroke-width="35" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="m74 278 116-31 81-38 78-64 49-52" fill="none" stroke="url(#green)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="m365 86 82-23-15 84-20-26-29-8z" fill="#41da14" stroke="#08763d" stroke-width="5"/>
+    <rect x="351" y="252" width="76" height="72" rx="24" fill="#00a957" stroke="#053d37" stroke-width="9"/>
+    <circle cx="389" cy="288" r="18" fill="#ffe438"/>
+  </g>
+  <circle cx="240" cy="240" r="222" fill="none" stroke="url(#ring)" stroke-width="10"/>
+</svg>
